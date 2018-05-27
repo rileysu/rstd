@@ -136,13 +136,11 @@ void squeezeArrList(int ind, void* src, ArrList l){
 }
 
 void remArrList(int ind, ArrList l){
-	printf("removing ind: %d\n",ind);
 	if (ind >= l->clength || ind < 0){
 		errno = EINVAL;
 		err(errno,"Invalid index specified in removal.");
 	} else {
 		for (int j = ind; j < l->clength - 1; j++){
-			printf("moving %d to %d\n",j+1,j);
 			memcpy((char*)l->head + j*l->nsize, (char*)l->head + (j+1)*l->nsize, l->nsize);
 		}
 		l->clength--;
