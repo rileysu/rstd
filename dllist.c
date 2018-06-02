@@ -88,7 +88,7 @@ void delDLList(void* src, size_t size, DLList l){
 	}
 }
 
-void delALLDLList(DLList sl, DLList dl){
+void delAllDLList(DLList sl, DLList dl){
 	if (sl == dl){
 		for (DLLNode n = sl->head; n != NULL;){
 			DLLNode tn = n;
@@ -160,6 +160,9 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 					freeDLLNode(n);
 					DLLNode newn = initDLLNode(src,size);
 
+					newn->next = nextn;
+					newn->prev = prevn;
+
 					if (nextn != NULL)
 						nextn->prev = newn;
 					if (prevn != NULL)
@@ -185,6 +188,9 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 
                                         freeDLLNode(n);
                                         DLLNode newn = initDLLNode(src,size);
+
+					newn->next = nextn;
+					newn->prev = prevn;
 
                                         if (nextn != NULL)
                                                 nextn->prev = newn;
@@ -212,11 +218,16 @@ void squeezeDLList(int ind, void* src, size_t size, DLList l){
                         if (i == ind){
 				DLLNode newn = initDLLNode(src,size);
 				
+				newn->next = n;
+				newn->prev = n->prev;
+
 				if (n->prev != NULL)
 					n->prev->next = newn;
 				else
 					l->head = newn;
 				n->prev = newn;
+
+				l->length++;
 				return;
                         }
                 }
@@ -226,11 +237,16 @@ void squeezeDLList(int ind, void* src, size_t size, DLList l){
                         if (i == ind){	
 				DLLNode newn = initDLLNode(src,size);
 				
+				newn->next = n;
+				newn->prev = n->prev;
+
 				if (n->prev != NULL)
 					n->prev->next = newn;
 				else
 					l->head = newn;
 				n->prev = newn;
+
+				l->length++;
 				return;
                         }
                 }

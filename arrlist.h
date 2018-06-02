@@ -34,6 +34,7 @@ void *getArrList(int,ArrList);//C
 void setArrList(int,void*,ArrList);
 void squeezeArrList(int,void*,ArrList);
 void remArrList(int,ArrList);
+
 void *getHeadArrList(ArrList);//C
 void *getTailArrList(ArrList);//C
 
