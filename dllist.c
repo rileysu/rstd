@@ -17,7 +17,7 @@ DLLNode initDLLNode(void *src, size_t size){
 }
 
 DLList initDLList(){
-	DLList = malloc(sizeof(struct DLList_t));
+	DLList l = malloc(sizeof(struct DLList_t));
 
 	l->head = NULL;
 	l->tail = NULL;
@@ -57,14 +57,14 @@ void addDLList(void* src, size_t size, DLList l){
 }
 
 void addAllDLList(DLList sl, DLList dl){
-	DLLNode tailn = sl->tail
+	DLLNode tailn = sl->tail;
 	for (DLLNode n = sl->head; n != tailn; n = n->next){
 		addDLList(dataDLLNode(n), n->size, dl);
 	}
 	addDLList(dataDLLNode(tailn), tailn->size, dl);
 }
 
-delDLList(void* src, size_t size, DLList l){
+void delDLList(void* src, size_t size, DLList l){
 	for (DLLNode n = l->head; n != NULL;){
 		if ( src == dataDLLNode(n) ){
 			fprintf(stderr,"Cannot use element is list as reference to delete.\n");
@@ -88,14 +88,14 @@ delDLList(void* src, size_t size, DLList l){
 	}
 }
 
-delALLDLList(DLList sl, DLList dl){
+void delALLDLList(DLList sl, DLList dl){
 	if (sl == dl){
 		for (DLLNode n = sl->head; n != NULL;){
 			DLLNode tn = n;
 			n = n->next;
 			freeDLLNode(tn);
 		}
-		sl->size = 0;
+		sl->length = 0;
 		sl->head = NULL;
 		sl->tail = NULL;
 	} else {
@@ -107,7 +107,7 @@ delALLDLList(DLList sl, DLList dl){
 
 bool containsDLList(void* src, size_t size, DLList l){
 	for (DLLNode n = l->head; n != NULL; n = n->next){
-		if ( (size == n->size) && (memcmp(src, n->data, n->size) == 0) ){
+		if ( (size == n->size) && (memcmp(src, dataDLLNode(n), n->size) == 0) ){
 			return TRUE;
 		}
 	}
@@ -117,18 +117,18 @@ bool containsDLList(void* src, size_t size, DLList l){
 int countDLList(void *src, size_t size, DLList l){
 	int count = 0;
 	for (DLLNode n = l->head; n != NULL; n = n->next){
-		if ( (size == n->size) && (memcmp(src, n->data, n->size) == 0) ){
+		if ( (size == n->size) && (memcmp(src, dataDLLNode(n), n->size) == 0) ){
 			count++;
 		}
 	}
 	return count;
 }
 
-void *getDLList(int ind, DLList l){
-	if (ind >= l->size || ind < 0){
+DLLNode getDLList(int ind, DLList l){
+	if (ind >= l->length || ind < 0){
 		fprintf(stderr, "Invalid index specified in get.\n");
-	} else if (ind >= l->size/2){
-		int i = l->size - 1;
+	} else if (ind >= l->length/2){
+		int i = l->length - 1;
 		for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
 			if (i == ind){
 				return n;
@@ -136,7 +136,7 @@ void *getDLList(int ind, DLList l){
 		}
 	} else {
 		int i = 0;
-		for (DLLNode n = l->head; n != NULL; n = n->next; i++){
+		for (DLLNode n = l->head; n != NULL; n = n->next, i++){
 			if (i == ind){
 				return n;
 			}
@@ -145,10 +145,10 @@ void *getDLList(int ind, DLList l){
 }
 
 void setDLList(int ind, void* src, size_t size, DLList l){
-	if (ind >= l->size || ind < 0){
+	if (ind >= l->length || ind < 0){
 		fprintf(stderr, "Invalid index specified in set.\n");
-	} else if (ind >= l->size/2){
-		int i = l->size - 1;
+	} else if (ind >= l->length/2){
+		int i = l->length - 1;
 		for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
 			if (i == ind){
 				if (size == n->size){
@@ -175,7 +175,7 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 		}
 	} else {
 		int i = 0;
-		for (DLLNode n = l->head; n != NULL; n = n->next; i++){
+		for (DLLNode n = l->head; n != NULL; n = n->next, i++){
 			if (i == ind){
                                 if (size == n->size){
                                         memcpy(dataDLLNode(n), src, size);
@@ -204,10 +204,10 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 }
 
 void squeezeDLList(int ind, void* src, size_t size, DLList l){
-        if (ind >= l->size || ind < 0){
+        if (ind >= l->length || ind < 0){
                 fprintf(stderr, "Invalid index specified in set.\n");
-        } else if (ind >= l->size/2){
-                int i = l->size - 1;
+        } else if (ind >= l->length/2){
+                int i = l->length - 1;
                 for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
                         if (i == ind){
 				DLLNode newn = initDLLNode(src,size);
@@ -222,7 +222,7 @@ void squeezeDLList(int ind, void* src, size_t size, DLList l){
                 }
         } else {
                 int i = 0;
-                for (DLLNode n = l->head; n != NULL; n = n->next; i++){
+                for (DLLNode n = l->head; n != NULL; n = n->next, i++){
                         if (i == ind){	
 				DLLNode newn = initDLLNode(src,size);
 				
@@ -238,10 +238,10 @@ void squeezeDLList(int ind, void* src, size_t size, DLList l){
 }
 
 void remDLList(int ind, DLList l){
-        if (ind >= l->size || ind < 0){
+        if (ind >= l->length || ind < 0){
                 fprintf(stderr, "Invalid index specified in set.\n");
-        } else if (ind >= l->size/2){
-                int i = l->size - 1;
+        } else if (ind >= l->length/2){
+                int i = l->length - 1;
                 for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
                         if (i == ind){
 				if (n->next != NULL)
@@ -259,7 +259,7 @@ void remDLList(int ind, DLList l){
                 }
         } else {
                 int i = 0;
-                for (DLLNode n = l->head; n != NULL; n = n->next; i++){
+                for (DLLNode n = l->head; n != NULL; n = n->next, i++){
                         if (i == ind){
                                 if (n->next != NULL)
                                         n->next->prev = n->prev;

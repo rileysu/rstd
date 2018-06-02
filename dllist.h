@@ -40,9 +40,6 @@ void setDLList(int,void*,size_t,DLList);
 void squeezeDLList(int,void*,size_t,DLList);
 void remDLList(int,DLList);
 
-DLLNode getHeadDLList(DLList);
-DLLNode getTailDLList(DLList);
-
 //Diag
 void printDiagsDLList(DLList);
 
