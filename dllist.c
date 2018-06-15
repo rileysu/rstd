@@ -294,7 +294,8 @@ void remDLList(int ind, DLList l){
 }
 
 void printDiagsDLList(DLList l){
-        for (int i = 0; i < 30; i++) printf("-");
+        for (int i = 0; i < 30; i++)
+		printf("-");
         printf("\n");
 
         printf("List Length:%d\n",l->length);
@@ -315,6 +316,7 @@ void printDiagsDLList(DLList l){
                 printf("\n");
         }
 
-        for (int i = 0; i < 30; i++) printf("-");
+        for (int i = 0; i < 30; i++)
+		printf("-");
         printf("\n");
 }
