@@ -67,7 +67,8 @@ void addAllDLList(DLList sl, DLList dl){
 void delDLList(void* src, size_t size, DLList l){
 	for (DLLNode n = l->head; n != NULL;){
 		if ( src == dataDLLNode(n) ){
-			fprintf(stderr,"Cannot use element is list as reference to delete.\n");
+			fprintf(stderr, "Cannot use element of list as reference to delete.\n");
+			exit(-1);
 		} else if ( (size == n->size) && (memcmp(src, dataDLLNode(n), n->size) == 0) ){
 			if (n->next != NULL) 
 				n->next->prev = n->prev;
@@ -125,9 +126,7 @@ int countDLList(void *src, size_t size, DLList l){
 }
 
 DLLNode getDLList(int ind, DLList l){
-	if (ind >= l->length || ind < 0){
-		fprintf(stderr, "Invalid index specified in get.\n");
-	} else if (ind >= l->length/2){
+	if (ind >= l->length/2){
 		int i = l->length - 1;
 		for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
 			if (i == ind){
@@ -145,9 +144,7 @@ DLLNode getDLList(int ind, DLList l){
 }
 
 void setDLList(int ind, void* src, size_t size, DLList l){
-	if (ind >= l->length || ind < 0){
-		fprintf(stderr, "Invalid index specified in set.\n");
-	} else if (ind >= l->length/2){
+	if (ind >= l->length/2){
 		int i = l->length - 1;
 		for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
 			if (i == ind){
@@ -210,9 +207,7 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 }
 
 void squeezeDLList(int ind, void* src, size_t size, DLList l){
-        if (ind >= l->length || ind < 0){
-                fprintf(stderr, "Invalid index specified in set.\n");
-        } else if (ind >= l->length/2){
+        if (ind >= l->length/2){
                 int i = l->length - 1;
                 for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
                         if (i == ind){
@@ -254,9 +249,7 @@ void squeezeDLList(int ind, void* src, size_t size, DLList l){
 }
 
 void remDLList(int ind, DLList l){
-        if (ind >= l->length || ind < 0){
-                fprintf(stderr, "Invalid index specified in set.\n");
-        } else if (ind >= l->length/2){
+        if (ind >= l->length/2){
                 int i = l->length - 1;
                 for (DLLNode n = l->tail; n != NULL; n = n->prev, i--){
                         if (i == ind){

@@ -1,32 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <err.h>
-#include <errno.h>
 
 #include "arrlist.h"
 
 ArrList initArrList(int length, size_t nsize){
-	if (nsize < sizeof(char)){
-		errno = EINVAL;
-		err(errno, "Invalid size of %d entered", nsize);
-	}
-	else if (length < 1){
-		errno = EINVAL;
-		err(errno, "Invalid length of %d entered", length);
-	}
-	else{
+	struct ArrList_t *l = malloc(sizeof(struct ArrList_t));
 
-		struct ArrList_t *l = malloc(sizeof(struct ArrList_t));
+	if ((l->head = malloc(nsize*length)) == NULL) 
+		fprintf(stderr, "Malloc failed in initArrList.\n");
+	l->nsize = nsize;
+	l->clength = 0;
+	l->length = length;
 
-		if ((l->head = malloc(nsize*length)) == NULL) 
-			err(errno,"Malloc failed.");
-		l->nsize = nsize;
-		l->clength = 0;
-		l->length = length;
-
-		return l;
-	}
+	return l;
 }
 
 void freeArrList(ArrList l){
@@ -36,9 +23,10 @@ void freeArrList(ArrList l){
 
 void expandArrList(int size, ArrList l){
 	void *nhead = realloc(l->head,size*l->nsize);
-	if (nhead == NULL) 
-		err(errno,"Realloc failed.");
-	else{
+	if (nhead == NULL){
+		fprintf(stderr, "Realloc failed in expandArrList.\n");
+		exit(-1);
+	} else {
 		l->head = nhead;
 		l->length = size;
 	}
@@ -104,47 +92,27 @@ int countArrList(void *src, ArrList l){
 }
 
 void *getArrList(int ind, ArrList l){
-	if (ind >= l->clength || ind < 0){
-		errno = EINVAL;
-		err(errno,"Invalid index specified in get.");	
-	} else 
-		return (char*)l->head + ind*l->nsize;
+	return (char*)l->head + ind*l->nsize;
 }
 
 void setArrList(int ind, void *src, ArrList l){
-	if (ind >= l->clength || ind < 0){ 
-		errno = EINVAL;
-		err(errno,"Invalid index specified in set.");
-	} else {
-		memcpy((char*)l->head + ind*l->nsize, src, l->nsize);
-	}
+	memcpy((char*)l->head + ind*l->nsize, src, l->nsize);
 }
 
 void squeezeArrList(int ind, void* src, ArrList l){
-	if (ind >= l->clength || ind < 0){
-		errno = EINVAL;
-		err(errno,"Invalid index specified in squeeze.");
-	} else {
-		l->clength++;
-		if (l->clength > l->length)
-			expandArrList(l->length*2,l);
-		for (int j = l->clength - 2; j >= ind; j--){
-			memcpy((char*)l->head + (j+1)*l->nsize, (char*)l->head + j*l->nsize, l->nsize);
-		}
-		setArrList(ind,src,l);
-	}
+	l->clength++;
+	if (l->clength > l->length)
+		expandArrList(l->length*2,l);
+	for (int j = l->clength - 2; j >= ind; j--)
+		memcpy((char*)l->head + (j+1)*l->nsize, (char*)l->head + j*l->nsize, l->nsize);
+	setArrList(ind,src,l);
 }
 
 void remArrList(int ind, ArrList l){
-	if (ind >= l->clength || ind < 0){
-		errno = EINVAL;
-		err(errno,"Invalid index specified in removal.");
-	} else {
-		for (int j = ind; j < l->clength - 1; j++){
-			memcpy((char*)l->head + j*l->nsize, (char*)l->head + (j+1)*l->nsize, l->nsize);
-		}
-		l->clength--;
+	for (int j = ind; j < l->clength - 1; j++){
+		memcpy((char*)l->head + j*l->nsize, (char*)l->head + (j+1)*l->nsize, l->nsize);
 	}
+	l->clength--;
 }
 
 void *getHeadArrList(ArrList l){
@@ -155,8 +123,7 @@ void *getTailArrList(ArrList l){
 	return (char*)l->head + (l->clength-1) * l->nsize;
 }
 
-void printDiagsArrList(ArrList l){
-	
+void printDiagsArrList(ArrList l){	
 	for (int i = 0; i < 30; i++) printf("-");
 	printf("\n");
 	
