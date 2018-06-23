@@ -4,8 +4,6 @@
 
 #include "dllist.h"
 
-#define dataDLLNode(N) (N+1) 
-
 DLLNode initDLLNode(void *src, size_t size){
 	DLLNode n = malloc(sizeof(struct DLLNode_t) + size);
 

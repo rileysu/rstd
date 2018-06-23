@@ -5,7 +5,7 @@
 
 #include "datatypes.h"
 
-#define forArrList(AP, BP) for( void *AP = BP->head; AP < (void*)((char*)(BP->head) + BP->clength * BP->nsize); AP = (void*)((char*)AP + BP->nsize) )
+#define forArrList(AP, BP) for(void *AP = BP->head; AP < (void*)((char*)(BP->head) + BP->clength * BP->nsize); AP = (void*)((char*)AP + BP->nsize) )
 
 typedef struct ArrList_t{
 	void *head;

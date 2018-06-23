@@ -5,6 +5,9 @@
 
 #include "datatypes.h"
 
+#define dataDLLNode(N) (N+1)
+#define forDLList(AP, BP) for(DLLNode AP = BP->head; AP != NULL; AP = AP->next)
+
 typedef struct DLLNode_t{
 	size_t size;
 	struct DLLNode_t *next;
