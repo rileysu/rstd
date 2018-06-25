@@ -109,9 +109,7 @@ void squeezeArrList(int ind, void* src, ArrList l){
 }
 
 void remArrList(int ind, ArrList l){
-	for (int j = ind; j < l->clength - 1; j++){
-		memcpy((char*)l->head + j*l->nsize, (char*)l->head + (j+1)*l->nsize, l->nsize);
-	}
+	memcpy((char*)l->head + ind*l->nsize, (char*)l->head + (ind+1)*l->nsize, (l->clength - ind)*l->nsize);
 	l->clength--;
 }
 
