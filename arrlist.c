@@ -34,11 +34,13 @@ void expandArrList(int size, ArrList l){
 
 void addArrList(void *src,  ArrList l){
 	if (l->clength < l->length){
-		memcpy((char*)l->head + l->clength*l->nsize,src,l->nsize);
+		if (src != NULL)
+			memcpy((char*)l->head + l->clength*l->nsize,src,l->nsize);
 		l->clength++;
 	} else {
 		expandArrList(l->length*2,l);
-		memcpy((char*)l->head + l->clength*l->nsize,src,l->nsize);
+		if (src != NULL)
+			memcpy((char*)l->head + l->clength*l->nsize,src,l->nsize);
 		l->clength++;
 	}
 
@@ -104,7 +106,8 @@ void squeezeArrList(int ind, void* src, ArrList l){
 	if (l->clength > l->length)
 		expandArrList(l->length*2,l);
 	for (int j = l->clength - 2; j >= ind; j--)
-		memcpy((char*)l->head + (j+1)*l->nsize, (char*)l->head + j*l->nsize, l->nsize);
+		if (src != NULL)
+			memcpy((char*)l->head + (j+1)*l->nsize, (char*)l->head + j*l->nsize, l->nsize);
 	setArrList(ind,src,l);
 }
 

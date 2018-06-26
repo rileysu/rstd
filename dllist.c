@@ -9,7 +9,8 @@ DLLNode initDLLNode(void *src, size_t size){
 
 	n->size = size;
 
-	memcpy(dataDLLNode(n),src,size);
+	if (src != NULL)
+		memcpy(dataDLLNode(n),src,size);
 	
 	return n;	
 }
@@ -175,8 +176,7 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 		int i = 0;
 		for (DLLNode n = l->head; n != NULL; n = n->next, i++){
 			if (i == ind){
-                                if (size == n->size){
-                                        memcpy(dataDLLNode(n), src, size);
+                        	memcpy(dataDLLNode(n), src, size);
                                 } else {
                                         DLLNode nextn = n->next;
                                         DLLNode prevn = n->prev;
