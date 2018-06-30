@@ -63,25 +63,29 @@ void addAllDLList(DLList sl, DLList dl){
 	addDLList(dataDLLNode(tailn), tailn->size, dl);
 }
 
+void delNodeDLList(DLLNode n, DLList l){
+	if (n->next != NULL) 
+		n->next->prev = n->prev;
+	if (n->prev != NULL)
+		n->prev->next = n->next;
+	if (n == l->head)
+		l->head = n->next;
+	if (n == l->tail)
+		l->tail = n->prev;
+	l->length--;
+	
+	freeDLLNode(n);
+}
+
 void delDLList(void* src, size_t size, DLList l){
 	for (DLLNode n = l->head; n != NULL;){
 		if ( src == dataDLLNode(n) ){
 			fprintf(stderr, "Cannot use element of list as reference to delete.\n");
 			exit(-1);
 		} else if ( (size == n->size) && (memcmp(src, dataDLLNode(n), n->size) == 0) ){
-			if (n->next != NULL) 
-				n->next->prev = n->prev;
-			if (n->prev != NULL)
-				n->prev->next = n->next;
-			if (n == l->head)
-				l->head = n->next;
-			if (n == l->tail)
-				l->tail = n->prev;
-			l->length--;
-			
 			DLLNode tn = n;
 			n = n->next;
-			freeDLLNode(tn);
+			delNodeDLList(tn, l);
 		} else {
 			n = n->next;
 		}
@@ -176,8 +180,9 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 		int i = 0;
 		for (DLLNode n = l->head; n != NULL; n = n->next, i++){
 			if (i == ind){
-                        	memcpy(dataDLLNode(n), src, size);
-                                } else {
+				if (size == n->size)
+                        		memcpy(dataDLLNode(n), src, size);
+                                else {
                                         DLLNode nextn = n->next;
                                         DLLNode prevn = n->prev;
 
@@ -198,7 +203,6 @@ void setDLList(int ind, void* src, size_t size, DLList l){
 
                                         return;
                                 }
-
 			}
 		}
 	}
@@ -289,7 +293,7 @@ void printDiagsDLList(DLList l){
 		printf("-");
         printf("\n");
 
-        printf("List Length:%d\n",l->length);
+        printf("List Length:%d\n", l->length);
 
         printf("Forwards:\n");
         for (DLLNode n = l->head; n != NULL; n = n->next){

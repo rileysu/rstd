@@ -5,7 +5,7 @@
 
 #include "datatypes.h"
 
-#define dataDLLNode(N) (N+1)
+#define dataDLLNode(N) (((DLLNode) N) + 1)
 #define forDLList(AP, BP) for(DLLNode AP = BP->head; AP != NULL; AP = AP->next)
 
 typedef struct DLLNode_t{
@@ -33,6 +33,7 @@ void addDLList(void*,size_t,DLList);
 void addAllDLList(DLList,DLList); 
 
 void delDLList(void*,size_t,DLList); 
+void delNodeDLList(DLLNode, DLList);
 void delAllDLList(DLList,DLList); 
 
 bool containsDLList(void*,size_t,DLList);
