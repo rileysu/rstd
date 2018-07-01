@@ -62,6 +62,7 @@ void addAllArrList(ArrList sl, ArrList dl){
 	}
 }
 
+//Undefined behaviour if src is in l
 void delArrList(void *src, ArrList l){
 	//Iterate through all indicies and delete those that match
 	for (int i = 0; i < l->length; i++){
@@ -86,14 +87,14 @@ void delAllArrList(ArrList sl, ArrList dl){
 }
 
 bool containsArrList(void *src, ArrList l){
-	//Iterate through all indicies and return if equal element found
+	//Iterate through all indicies and return TRUE if equal element found
 	for (int i = 0; i < l->clength; i++){
 		if (memcmp(src,l->head + i*l->nsize,l->nsize) == 0){
 			return TRUE;
 		}
 	}
 
-	//If this point is reached then no element in the list is equal and thus we return FALSE
+	//No element in the list is equal and thus we return FALSE
 	return FALSE;
 }
 
