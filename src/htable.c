@@ -24,6 +24,7 @@ HTable initHTable(int length, unsigned int (*hash)(void*, size_t, int)){
 	ht->clength = 0;
 	ht->length = length;
 	ht->hash = hash;
+	return ht;
 }
 
 void freeHTNode(HTNode n, DLList l){

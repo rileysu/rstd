@@ -195,6 +195,9 @@ DLLNode getDLList(int ind, DLList l){
 			}
 		}
 	}
+
+	//Here so we don't get warnings
+	return NULL;
 }
 
 void setDLList(int ind, void* src, size_t size, DLList l){

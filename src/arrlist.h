@@ -15,32 +15,32 @@ typedef struct ArrList_t{
 } *ArrList;
 
 //Init
-ArrList initArrList(int length, size_t nsize); //C
+ArrList initArrList(int, size_t);
 
 //Free
-void freeArrList(ArrList); //C
+void freeArrList(ArrList);
 
 //Misc
 void expandArrList(int,ArrList);
 
-void addArrList(void*,ArrList); //C
-void addAllArrList(ArrList,ArrList); //C
+void addArrList(void*,ArrList);
+void addAllArrList(ArrList,ArrList);
 
-void delArrList(void*,ArrList); //C
-void delAllArrList(ArrList,ArrList); //C
+void delArrList(void*,ArrList);
+void delAllArrList(ArrList,ArrList);
 
-bool containsArrList(void*,ArrList);//C
-int countArrList(void*,ArrList); //C
+bool containsArrList(void*,ArrList);
+int countArrList(void*,ArrList);
 
-void *getArrList(int,ArrList);//C
+void *getArrList(int,ArrList);
 void setArrList(int,void*,ArrList);
 void squeezeArrList(int,void*,ArrList);
 void remArrList(int,ArrList);
 
-void *getHeadArrList(ArrList);//C
-void *getTailArrList(ArrList);//C
+void *getHeadArrList(ArrList);
+void *getTailArrList(ArrList);
 
 //Diag
-void printDiagsArrList(ArrList);//C
+void printDiagsArrList(ArrList);
 
 #endif
