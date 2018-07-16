@@ -145,11 +145,15 @@ void remArrList(int ind, ArrList l){
 }
 
 void *getHeadArrList(ArrList l){
+	if (l->clength == 0)
+		return NULL;
 	return l->head;
 }
 
 void *getTailArrList(ArrList l){
 	//Jump to the end element pointer using clength and size
+	if (l->clength == 0)
+		return NULL;
 	return (char*)l->head + (l->clength-1) * l->nsize;
 }
 
