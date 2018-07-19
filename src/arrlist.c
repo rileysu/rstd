@@ -154,7 +154,7 @@ void *getTailArrList(ArrList l){
 	//Jump to the end element pointer using clength and size
 	if (l->clength == 0)
 		return NULL;
-	return (char*)l->head + (l->clength-1) * l->nsize;
+	return (char*)(l->head) + (l->clength-1) * l->nsize;
 }
 
 void printDiagsArrList(ArrList l){	
