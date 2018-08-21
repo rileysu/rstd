@@ -39,6 +39,8 @@ void delAllDLList(DLList,DLList);
 bool containsDLList(void*,size_t,DLList);
 int countDLList(void*,size_t,DLList); 
 
+DLList cloneDLList(DLList);
+
 DLLNode getDLList(int,DLList);
 void setDLList(int,void*,size_t,DLList); 
 void squeezeDLList(int,void*,size_t,DLList);

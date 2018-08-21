@@ -32,6 +32,8 @@ void delAllArrList(ArrList,ArrList);
 bool containsArrList(void*,ArrList);
 int countArrList(void*,ArrList);
 
+ArrList cloneArrList(ArrList);
+
 void *getArrList(int,ArrList);
 void setArrList(int,void*,ArrList);
 void squeezeArrList(int,void*,ArrList);

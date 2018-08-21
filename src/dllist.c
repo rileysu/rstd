@@ -200,6 +200,13 @@ DLLNode getDLList(int ind, DLList l){
 	return NULL;
 }
 
+DLList cloneDLList(DLList l){
+	//Simple add each node individually (no faster way)
+	DLList lc = initDLList();
+	addAllDLList(l, lc);
+	return lc;
+}
+
 void setDLList(int ind, void* src, size_t size, DLList l){
 	//Find which direction will be more efficient to traverse the linked list
 	//Increment from tail if ind is closer to the tail

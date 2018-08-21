@@ -45,21 +45,22 @@ void addArrList(void *src,  ArrList l){
 		expandArrList(l->length*2,l);
 
 	if (src != NULL)
-		memcpy((char*)l->head + l->clength*l->nsize,src,l->nsize);
+		memcpy((char*)l->head + l->clength*l->nsize, src, l->nsize);
 
 	l->clength++;
 
 }
 
 void addAllArrList(ArrList sl, ArrList dl){
-	//If sl == dl then the next loop will not end since the add function increments clength by 1
-	//So we create a static clength
-	int clength = sl->clength;
+	//Next power of 2 in dl to fit sl
+	int length = dl->length;
+	while (sl->clength + dl->clength > length)
+		length*=2;
+	expandArrList(length, dl);
 
-	//Iterate through all elements in sl and add accordingly
-	for (int i = 0; i < clength; i++){
-		addArrList((char*)sl->head + i*dl->nsize,dl);
-	}
+	//Copy all the data in one chunk over to the destination list and increment the clength
+	memcpy((char*)dl->head + dl->clength*dl->nsize, sl->head, sl->clength*sl->nsize);
+	dl->clength += sl->clength;
 }
 
 //Undefined behaviour if src is in l
@@ -108,6 +109,13 @@ int countArrList(void *src, ArrList l){
 
 	//All elements tested and incremented accordingly and thus we return the count
 	return count;
+}
+
+ArrList cloneArrList(ArrList l){
+	//Add all optimised for large sections of data
+	ArrList lc = initArrList(l->length, l->nsize);
+	addAllArrList(l, lc);
+	return lc;
 }
 
 void *getArrList(int ind, ArrList l){
