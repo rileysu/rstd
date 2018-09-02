@@ -4,37 +4,37 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "dllist.h"
+#include "arrlist.h"
+#include "datatypes.h"
+#include "derefvoid.h"
 
-#define keyHTNode(N) (((HTNode)N)+1)
-#define valueHTNode(N) ((char*)(((HTNode)N) + 1) + N->keysize)
-
-typedef struct HTNode_t{
-	size_t keysize;
-	size_t valuesize;
-} *HTNode;
+#define getPopulatedHTable(AP, HP) derefVoid(AP, bool)
+#define getKeyHTable(AP, HP) ((void*)((char*)AP + sizeof(bool)))
+#define getValueHTable(AP, HP) ((void*)((char*)AP + sizeof(bool) + HP->keysize))
 
 typedef struct HTable_t{
-	DLList *arr;
-	int clength;
+	ArrList l;
+	size_t keysize;
+	size_t valuesize;
 	int length;
+	int clength;
 	unsigned int (*hash)(void*, size_t, int);
 } *HTable;
 
 //Init
-HTNode initHTNode(void*,size_t,void*,size_t,DLList);
-HTable initHTable(int,unsigned int(void*,size_t,int));
+HTable initHTable(int,size_t,size_t,unsigned int(void*,size_t,int));
 
 //Free
-void freeHTNode(HTNode,DLList);
 void freeHTable(HTable);
 
 //Misc
-void addHTable(void*,size_t,void*,size_t,HTable);
+void expandHTable(int,HTable);
 
-HTNode getHTable(void*,size_t,HTable);
+void setHTable(void*,void*,HTable);
 
-void remHTable(void*,size_t,HTable);
+void *getHTable(void*,HTable);
+
+void remHTable(void*,HTable);
 
 //Diag
 void printDiagsHTable(HTable);

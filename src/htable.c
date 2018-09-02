@@ -3,78 +3,109 @@
 #include <string.h>
 
 #include "htable.h"
-#include "dllist.h"
+#include "arrlist.h"
+#include "datatypes.h"
 
-HTNode initHTNode(void *key, size_t keysize, void *value, size_t valuesize, DLList l){
-	addDLList(NULL, sizeof(struct HTNode_t) + keysize + valuesize, l);
-	DLLNode dn = l->tail;
-	HTNode n = (HTNode) dataDLLNode(dn);
-	n->keysize = keysize;
-	n->valuesize = valuesize;
-	memcpy(keyHTNode(n), key, keysize);
-	memcpy(valueHTNode(n), value, valuesize);
-	return n;
+static void placeHTable(void *key, void *value, HTable ht){
+	unsigned int pos = ht->hash(key, ht->keysize, ht->length);
+
+        for (int i = pos; i < ht->length; i++){
+                if (!getPopulatedHTable(getArrList(i, ht->l), ht)){
+                        char *el = (char*)getArrList(i, ht->l);
+                        *(bool*)el = TRUE;
+                        memcpy(el + sizeof(bool), key, ht->keysize);
+                        memcpy(el + sizeof(bool) + ht->keysize, value, ht->valuesize);
+                        return;
+                }
+        }
+
+        for (int i = 0; i < pos; i++){
+                if (!getPopulatedHTable(getArrList(i, ht->l), ht)){
+                        char *el = (char*)getArrList(i, ht->l);
+                        *(bool*)el = TRUE;
+                        memcpy(el + sizeof(bool), key, ht->keysize);
+                        memcpy(el + sizeof(bool) + ht->keysize, value, ht->valuesize);
+                        return;
+                }
+        }
+
+        printf("The impossible happened!\n");
 }
 
-HTable initHTable(int length, unsigned int (*hash)(void*, size_t, int)){
+HTable initHTable(int length, size_t keysize, size_t valuesize, unsigned int (*hash)(void*, size_t, int)){
 	HTable ht = malloc(sizeof(struct HTable_t));
-	ht->arr = malloc(sizeof(DLList) * length);
-	for (int i = 0; i < length; i++)
-		ht->arr[i] = initDLList();
+	
+	ht->l = initArrList(length, sizeof(bool) + keysize + valuesize);
+	ht->l->clength = length;
+	memset(ht->l->head, 0, (sizeof(bool) + keysize + valuesize) * length);
+
+	ht->keysize = keysize;
+	ht->valuesize = valuesize;
 	ht->clength = 0;
 	ht->length = length;
 	ht->hash = hash;
+
 	return ht;
 }
 
-void freeHTNode(HTNode n, DLList l){
-	delNodeDLList(((DLLNode) n) - 1, l);
-}
-
 void freeHTable(HTable ht){
-	for (int i = 0; i < ht->length; i++)
-		freeDLList(ht->arr[i]);
-	free(ht->arr);
+	freeArrList(ht->l);
 	free(ht);
 }
 
-void addHTable(void *key, size_t keysize, void *value, size_t valuesize, HTable ht){
-	unsigned int hashval = ht->hash(key, keysize, ht->length);
-	DLList l = ht->arr[hashval];
-	HTNode n = NULL;
-	
-	forDLList(i,l){
-		if (keysize == ((HTNode) dataDLLNode(i))->keysize && memcmp(key, keyHTNode(dataDLLNode(i)), keysize) == 0){
-			n = (HTNode) dataDLLNode(i);
-			break;
+void expandHTable(int length, HTable ht){
+	ArrList tl = cloneArrList(ht->l);
+	expandArrList(length, ht->l);
+	ht->l->clength = length;
+	ht->length = length;
+	memset(ht->l->head, 0, ht->l->nsize * ht->l->length);
+
+	for(int i = 0; i < tl->length; i++){
+		void *el = getArrList(i, tl);
+		if (getPopulatedHTable(el, ht)){
+			//unsigned int pos = ht->hash(getKeyHTable(el, ht), ht->keysize, ht->length);
+			//memset(getArrList(i, ht->l), 0, ht->l->nsize);
+			placeHTable(getKeyHTable(el, ht), getValueHTable(el, ht), ht);
 		}
 	}
 
-	if (n == NULL){
-		initHTNode(key, keysize, value, valuesize, ht->arr[hashval]);
-		ht->clength++;
-	} else {
-		freeHTNode(n, ht->arr[hashval]);
-		initHTNode(key, keysize, value, valuesize, ht->arr[hashval]);
-	}
+	freeArrList(tl);
 }
 
-HTNode getHTable(void *key, size_t keysize, HTable ht){
-	unsigned int hashval = ht->hash(key, keysize, ht->length);
-	DLList l = ht->arr[hashval];
-	
-	forDLList(i,l)
-		if (keysize == ((HTNode) dataDLLNode(i))->keysize && memcmp(key, keyHTNode(dataDLLNode(i)), keysize) == 0)
-			return (HTNode) dataDLLNode(i);
+void setHTable(void *key, void *value, HTable ht){
+	if (ht->clength == ht->length)
+		expandHTable(ht->length*2, ht);
+
+	void *el = getHTable(key, ht);
+
+	if (el == NULL){
+		placeHTable(key, value, ht);	
+		ht->clength++;
+	} else
+		memcpy(el, value, ht->valuesize);
+}
+
+void *getHTable(void *key, HTable ht){
+	unsigned int pos = ht->hash(key, ht->keysize, ht->length);
+
+	for (int i = pos; i < ht->length; i++){
+		if (memcmp(getKeyHTable(getArrList(i, ht->l), ht), key, ht->keysize) == 0){
+			return getValueHTable(getArrList(i, ht->l), ht);
+		}
+	}
+	for (int i = 0; i < pos; i++){
+		if (memcmp(getKeyHTable(getArrList(i, ht->l), ht), key, ht->keysize) == 0){
+			return getValueHTable(getArrList(i, ht->l), ht);
+		}
+	}
+
 	return NULL;
 }
 
-void remHTable(void *key, size_t keysize, HTable ht){
-	unsigned int hashval = ht->hash(key, keysize, ht->length);
-	HTNode n = getHTable(key, keysize, ht);
-	
-	if (n != NULL)
-		freeHTNode(n, ht->arr[hashval]);
+void remHTable(void *key, HTable ht){
+	void *el = getHTable(key, ht);
+	if (el != NULL)
+		memset(el, 0, sizeof(bool) + ht->keysize + ht->valuesize);
 }
 
 void printDiagsHTable(HTable ht){
@@ -85,12 +116,19 @@ void printDiagsHTable(HTable ht){
 	printf("HashTable Length:%d\n", ht->length);
 	printf("HashTable CLength:%d\n", ht->clength);
 
-	printf("Contains:\n");
+	printf("Contains:\n\n");
 	for (int i = 0; i < ht->length; i++){
-		if (ht->arr[i]->length != 0){
-			printf("Table Hash:%d\n", i);
-			printDiagsDLList(ht->arr[i]);
-		}
+		printf("Table Hash:%d\n", i);
+		printf("Calculated Hash:%u\n", ht->hash(getKeyHTable(getArrList(i, ht->l), ht), ht->keysize, ht->length));
+		printf("Populated: %d\n", derefVoid(getArrList(i, ht->l), bool));
+		printf("Key: ");
+		for (int j = 0; j < ht->keysize; j++)
+			printf("%02x", *((unsigned char*)getArrList(i, ht->l) + sizeof(bool) + j));
+		printf("\n");
+		printf("Value: ");
+		for (int j = 0; j < ht->valuesize; j++)
+			printf("%02x", *((unsigned char*)getArrList(i, ht->l) + sizeof(bool) + ht->keysize + j));
+		printf("\n\n");
 	}
 	
 	for (int i = 0; i < 30; i++)
