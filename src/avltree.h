@@ -13,10 +13,10 @@ typedef struct AVLNode_t{
 } *AVLNode;
 
 typedef struct AVLTree_t{
-	AVL_Node head;
+	AVLNode head;
 	size_t nsize;
 	int length;
-	int (*compare)(void*,void*,size_t); 
+	int (*compare)(void*,void*); 
 		//: {-1, 0, 1}
 		//-1 ==> src1 < src2
 		//0 ==> src1 == src2
@@ -26,7 +26,7 @@ typedef struct AVLTree_t{
 
 //Init
 AVLNode initAVLNode(void*,AVLTree);
-AVLTree initAVLTree(size_t,int(void*,void*,size_t));
+AVLTree initAVLTree(size_t,int(void*,void*));
 
 //Free
 void freeAVLNode(AVLNode);
@@ -44,7 +44,7 @@ void delAVLList(void*,AVLTree);
 
 void rebalanceAVLTree(AVLTree);
 
-AVLNode searchAVLTree(void,AVLTree);
+AVLNode searchAVLTree(void*,AVLTree);
 
 //Diag
 void printDiagsAVLTree(AVLTree);

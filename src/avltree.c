@@ -19,13 +19,14 @@ AVLNode initAVLNode(void *src, AVLTree t){
 	return n;
 }
 
-AVLTree initAVLTree(size_t size){
+AVLTree initAVLTree(size_t nsize, int (*compare)(void*,void*)){
 	AVLTree t = malloc(sizeof(struct AVLTree_t));
 
 	//Empty tree has no elements or head
 	t->head = NULL;
-	t->nsize = size;
+	t->nsize = nsize;
 	t->length = 0;
+	t->compare = compare;
 
 	return t;
 }
@@ -34,35 +35,41 @@ void freeAVLNode(AVLNode n){
 	free(n);
 }
 
-void freeAVLTree(AVLTree){
-	//We use a stack because it is lightweight to implement in terms of memory and processing
-	//plus it is mathematically better since it can only ever need log(n) space to use while
-	//a queue may need n
+void freeAVLTree(AVLTree t){
+	if (t->length != 0){
+		//We use a stack because it is lightweight to implement in terms of memory and processing
+		//plus it is mathematically better since it can only ever need log(n) space to use while
+		//a queue may need n
+		
+		//Log2(t->length) should work but we make it t->length FOR NOW because i will worry about math
+		//libraries later
+		
+		//Note that the arrlist will work regardless of initial size, it is purely for performance
+		ArrList s = initArrList(t->length, sizeof(AVLNode));
 	
-	//Log2(t->length) should work but we make it t->length FOR NOW because i will worry about math
-	//libraries later
+		//Init the stack with the head of the tree
+		addArrList(&(t->head), s);
 	
-	//Note that the arrlist will work regardless of initial size, it is purely for performance
-	ArrList s = initArrList(t->length, sizeof(struct AVLNode_t*));
+		AVLNode sn;
+	
+		while (s->clength > 0){
+			//Pop from stack and remove element
+			sn = *(AVLNode*)getArrList(s->clength-1, s);
+			remArrList(s->clength-1, s);
+	
+			if (sn->left != NULL)
+				addArrList(&(sn->left), s);
+	
+			if (sn->right != NULL)
+				addArrList(&(sn->right), s);
+	
+			freeAVLNode(sn);
+		}
 
-	//Init the stack with the head of the tree
-	addArrList(&(t->head), s);
-
-	AVLNode sn;
-
-	while (s->clength > 0){
-		//Pop from stack and remove element
-		sn = *(AVLNode*)getArrList(s->clength-1, s);
-		remArrList(s->clength-1, s);
-
-		if (sn->left != NULL)
-			addArrList(&(sn->left), s);
-
-		if (sn->right != NULL)
-			addArrList(&(sn->right), s);
-
-		freeAVLNode(sn);
+		freeArrList(s);
 	}
+
+	free(t);
 }
 
 AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
@@ -99,52 +106,67 @@ AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
 }
 
 void addAVLTree(void *src, AVLTree t){
-	//Add the node
-	AVLNode currn = t->head;
-	bool allocated = FALSE;
-
-	while (!allocated){
-		if (t->compare(src, dataAVLNode(currn), t->nsize) > 0){ //src > currn
-			if (currn->right != NULL)
-				currn = currn->right;
-			else {
-				currn->right = initAVLNode(src, t);
-				currn->right->parent = currn;
-				allocated = TRUE;
-			}
-		} else { // src <= currn
-			if (currn->left != NULL)
-				currn = currn->left;
-			else {
-				currn->right = initAVLNode(src, t);
-				currn->right->parent = currn;
-				allocated = TRUE;
+	if (t->length == 0){
+		t->head = initAVLNode(src, t);
+		t->head->parent = NULL;
+		t->head->height = 0;
+		t->head->left = NULL;
+		t->head->right = NULL;
+	} else {
+		//Add the node
+		AVLNode currn = t->head;
+	
+		for (bool allocated = FALSE; !allocated;){
+			if (t->compare(dataAVLNode(currn), src) > 0){ //src > currn
+				if (currn->right != NULL){
+					printf("%p -> %p\n", currn, currn->right);
+					currn = currn->right;
+				} else {
+					currn->right = initAVLNode(src, t);
+					currn->right->parent = currn;
+					currn->right->height = 0;
+					currn->right->left = NULL;
+					currn->right->right = NULL;
+					allocated = TRUE;
+				}
+			} else { // src <= currn
+				if (currn->left != NULL){
+					printf("%p -> %p\n", currn, currn->left);
+					currn = currn->left;
+				} else {
+					currn->left = initAVLNode(src, t);
+					currn->left->parent = currn;
+					currn->left->height = 0;
+					currn->left->left = NULL;
+					currn->left->right = NULL;
+					allocated = TRUE;
+				}
 			}
 		}
 	}
-
+	
 	//TODO
 	//Balance tree from currn
+	
+	
+	t->length++;
 }
 
-printDiagsAVLTree(AVLTree t){
+void printDiagsAVLTree(AVLTree t){
 	//Performance and size aren't that big of an issue for diags
-	ArrList q = initArrList(t->length, sizeof(AVLNode));
+	ArrList q = initArrList(t->length+1, sizeof(AVLNode));
 
 	//Print generic tree stats
 	for (int i = 0; i < 30; i++) printf("-");
 	printf("\n");
 	
 	printf("Tree Head: %p\n", t->head);
-	printf("Tree NSize: %u\n", t->nsize);
+	printf("Tree NSize: %lu\n", t->nsize);
 	printf("Tree Length: %d\n", t->length);
 	printf("Tree Compare: %p\n", t->compare);
 	
-	for (int i = 0; i < 30; i++) printf("-");
-	printf("\n");
-	
-
-	addArrList(&(t->head), q);
+	if (t->length != 0)
+		addArrList(&(t->head), q);
 
 	AVLNode qn;
 
@@ -157,6 +179,12 @@ printDiagsAVLTree(AVLTree t){
 		for (int i = 0; i < 30; i++) printf("-");
 		printf("\n");
 
+		printf("Node Address:%p\n", qn);
+		printf("Node Data:");
+		for (int i = t->nsize-1; i >= 0; i--){
+			printf("%02x",(*(((unsigned char*)dataAVLNode(qn)) + i)));
+		}
+		printf("\n");	
 		printf("Node Parent:%p\n", qn->parent);
 		printf("Node Height:%d\n", qn->height);
 		printf("Node Left:%p\n", qn->left);
@@ -171,4 +199,9 @@ printDiagsAVLTree(AVLTree t){
 		if (qn->right != NULL)
 			addArrList(&(qn->right), q);
 	}
+	
+	for (int i = 0; i < 30; i++) printf("-");
+	printf("\n");
+
+	freeArrList(q);
 }
