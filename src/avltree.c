@@ -38,8 +38,8 @@ void freeAVLNode(AVLNode n){
 void freeAVLTree(AVLTree t){
 	if (t->length != 0){
 		//We use a stack because it is lightweight to implement in terms of memory and processing
-		//plus it is mathematically better since it can only ever need log(n) space to use while
-		//a queue may need n
+		//plus it needs less space than a queue since it can only ever need log(n) space to use while
+		//a queue may need n because we can use a depth first search to free all nodes with a stack
 		
 		//Log2(t->length) should work but we make it t->length FOR NOW because i will worry about math
 		//libraries later
@@ -57,10 +57,10 @@ void freeAVLTree(AVLTree t){
 			sn = *(AVLNode*)getArrList(s->clength-1, s);
 			remArrList(s->clength-1, s);
 	
-			if (sn->left != NULL)
+			if (sn->left != NULL) //Push to stack
 				addArrList(&(sn->left), s);
 	
-			if (sn->right != NULL)
+			if (sn->right != NULL) //Push to stack
 				addArrList(&(sn->right), s);
 	
 			freeAVLNode(sn);
@@ -73,27 +73,59 @@ void freeAVLTree(AVLTree t){
 }
 
 AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
-	AVLNode pn = n->parent;
-	AVLNode yn = n->left;
-	AVLNode t3n = yn->right;
+	//Left child of n becomes new root respective to n
+	//Right child of new root becomes left child of old root
+	
+	AVLNode ln = n->left;
+	AVLNode lnrc = ln->right;
 
-	yn->right = n;
-	n->parent = yn;
+	ln->right = n;
+	n->left = lnrc;
 
-	n->left = t3n;
-	t3n->parent = n;
+	//Parent of n is now the old left node of n
+	//Parent of the old left node is now the parent of n (Hence new root)
+	
+	ln->parent = n->parent;
+	n->parent  = ln;
 
-	if (pn->right == n)
-		pn->right = yn;
-	else
-		pn->left = yn;
-	yn->parent = pn;
-
-	n->height = (n->right->height > n->left->height ? n->right->height : n->left->height) + 1;
-	yn->height = (yn->right->height > yn->left->height ? yn->right->height : yn->left->height) + 1;
+	if (ln->parent != NULL){
+		if (ln->parent->right == n){
+			ln->parent->right = ln;
+		} else {
+			ln->parent->left = ln;
+		}
+	}
 }
 
 AVLNode rotateLeftAVLTree(AVLNode n, AVLTree t){
+	//Right child of n becomes new root respective to n
+	//Left child of new root becomes right child of old root
+
+	AVLNode rn = n->right;
+	AVLNode rnlc = rn->left;
+
+	rn->left = n;
+	n->right = rnlc;
+
+	//Parent of n is now the old right node of n
+	//Parent of the old right node is now the parent of n (Hence new root)
+	
+	rn->parent = n->parent;
+	n->parent = rn;
+
+	//Fix parent not refering to the new root (if it exists)
+	if (rn->parent != NULL){
+		if (rn->parent->right == n){
+			rn->parent->right = rn;
+		} else {
+			rn->parent->left = rn;
+		}
+	}
+	
+
+}
+
+AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
 	
 }
 
@@ -101,9 +133,6 @@ AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
 	
 }
 
-AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
-	
-}
 
 void addAVLTree(void *src, AVLTree t){
 	if (t->length == 0){
@@ -115,9 +144,10 @@ void addAVLTree(void *src, AVLTree t){
 	} else {
 		//Add the node
 		AVLNode currn = t->head;
-	
-		for (bool allocated = FALSE; !allocated;){
-			if (t->compare(dataAVLNode(currn), src) > 0){ //src > currn
+
+		bool allocated = FALSE;
+		while (!allocated){
+			if (t->compare(dataAVLNode(currn), src) < 0){ //src > currn
 				if (currn->right != NULL){
 					printf("%p -> %p\n", currn, currn->right);
 					currn = currn->right;
@@ -148,8 +178,110 @@ void addAVLTree(void *src, AVLTree t){
 	//TODO
 	//Balance tree from currn
 	
-	
 	t->length++;
+}
+
+void delAVLTree(void *src, AVLTree t){
+	AVLNode currn = t->head;
+
+	bool deleted = FALSE;
+	while (!deleted){
+		int comp = t->compare(dataAVLNode(currn), src);
+		if (comp == 0){ //src == currn
+			if (currn->right == NULL && currn->left == NULL){ //Case No children present
+				//Simply delete the node since nothing depends on it
+				
+				//Remove the reference from the parent to the child if the parent exists
+				if (currn->parent != NULL){
+					if (currn->parent->right == currn){
+						currn->parent->right = NULL;
+					} else {
+						currn->parent->left = NULL;
+					}
+				}
+
+				//Change the head to null if currn is the only node
+				if (t->head == currn){
+					t->head = NULL;
+				}
+
+				//Free the node using the correct free function
+				freeAVLNode(currn);
+			} else if (currn->right == NULL){ //Case left child present
+				//Simply replace the current node with its single child
+			
+				//Change parent to refer to the child of currn
+				if (currn->parent != NULL){
+					if (currn->parent->right == currn){
+						currn->parent->right = currn->left;
+					} else {
+						currn->parent->left = currn->left;
+					}
+				}
+
+				//Change the head to the new node if currn is the head
+				if (t->head == currn){
+					t->head = currn->left;
+				}
+				
+				//Change the parent of the new currn to 
+				currn->left->parent = currn->parent;
+
+				//Free the node using the correct free function
+				freeAVLNode(currn);
+			} else if (currn->left == NULL){ //Case right child present
+				//Simply replace the current node with its single child
+			
+				//Change parent to refer to the child of currn
+				if (currn->parent != NULL){
+					if (currn->parent->right == currn){
+						currn->parent->right = currn->right;
+					} else {
+						currn->parent->left = currn->right;
+					}
+				}
+
+				//Change the head to the new node if currn is the head
+				if (t->head == currn){
+					t->head = currn->right;
+				}
+				
+				//Change the parent of the new currn to 
+				currn->right->parent = currn->parent;
+
+				//Free the node using the correct free function
+				freeAVLNode(currn);
+			} else { //Case both children present
+			
+				//Remove the node from the heighest subtree
+				//Find either the greatest node in the min tree
+				//or the min node in the max tree
+				//Both are a guaranteed replacement for the currn
+				if (currn->left->height > currn->right->height){
+					//Find max node in min tree
+					//Guaranteed to be greatert
+					AVLNode maxn;
+					for (maxn = currn->left; maxn->right != NULL; maxn = maxn->right);
+					
+					//Replace the currn with maxn
+
+				} else {
+				
+				}
+			}
+			
+			//Decrement the length of the tree
+			t->length--;
+		} else if (comp < 0) { //src > currn
+			if (currn->right != NULL){
+				
+			} else {
+
+			}
+		} else { //src <= currn
+			
+		}
+	}
 }
 
 void printDiagsAVLTree(AVLTree t){
@@ -171,27 +303,11 @@ void printDiagsAVLTree(AVLTree t){
 	AVLNode qn;
 
 	while (q->clength > 0){
-		//Pop from stack and remove element
+		//Pop from queue and remove element
 		qn = *(AVLNode*)getArrList(0, q);
 		remArrList(0, q);
 
-		//Print generic node stats
-		for (int i = 0; i < 30; i++) printf("-");
-		printf("\n");
-
-		printf("Node Address:%p\n", qn);
-		printf("Node Data:");
-		for (int i = t->nsize-1; i >= 0; i--){
-			printf("%02x",(*(((unsigned char*)dataAVLNode(qn)) + i)));
-		}
-		printf("\n");	
-		printf("Node Parent:%p\n", qn->parent);
-		printf("Node Height:%d\n", qn->height);
-		printf("Node Left:%p\n", qn->left);
-		printf("Node Right:%p\n", qn->right);
-	
-		for (int i = 0; i < 30; i++) printf("-");
-		printf("\n");
+		printDiagsAVLNode(qn, t);
 
 		if (qn->left != NULL)
 			addArrList(&(qn->left), q);
@@ -204,4 +320,28 @@ void printDiagsAVLTree(AVLTree t){
 	printf("\n");
 
 	freeArrList(q);
+}
+
+void printDiagsAVLNode(AVLNode n, AVLTree t){
+		for (int i = 0; i < 30; i++) printf("-");
+		printf("\n");
+
+		printf("Node Address:%p\n", n);
+		
+		//Print hex of whatever the node contains
+		printf("Node Data: 0x");
+		for (int i = t->nsize-1; i >= 0; i--){
+			printf("%02x",(*(((unsigned char*)dataAVLNode(n)) + i)));
+		}
+
+		printf("\n");	
+		printf("Node Parent:%p\n", n->parent);
+		printf("Node Height:%d\n", n->height);
+		printf("Node Left:%p\n", n->left);
+		printf("Node Right:%p\n", n->right);
+	
+		for (int i = 0; i < 30; i++) printf("-");
+		printf("\n");
+
+
 }

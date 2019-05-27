@@ -37,9 +37,8 @@ void freeAVLTree(AVLTree);
 void addAVLTree(void*,AVLTree);
 //addAllAVLTree
 
-void delAVLList(void*,AVLTree);
+void delAVLTree(void*,AVLTree);
 //delAllAVLTree
-//
 
 
 void rebalanceAVLTree(AVLTree);
@@ -48,5 +47,6 @@ AVLNode searchAVLTree(void*,AVLTree);
 
 //Diag
 void printDiagsAVLTree(AVLTree);
+void printDiagsAVLNode(AVLNode, AVLTree);
 
 #endif
