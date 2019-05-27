@@ -147,7 +147,12 @@ void addAVLTree(void *src, AVLTree t){
 
 		bool allocated = FALSE;
 		while (!allocated){
-			if (t->compare(dataAVLNode(currn), src) < 0){ //src > currn
+			int comp = t->compare(dataAVLNode(currn), src);
+			if (comp == 0){
+				//Do nothing since the node with that value already exists
+				//Rebalance is not required either since the state was not changed
+				return;
+			} else if (comp < 0){ //src > currn
 				if (currn->right != NULL){
 					printf("%p -> %p\n", currn, currn->right);
 					currn = currn->right;
@@ -159,7 +164,7 @@ void addAVLTree(void *src, AVLTree t){
 					currn->right->right = NULL;
 					allocated = TRUE;
 				}
-			} else { // src <= currn
+			} else { // src < currn
 				if (currn->left != NULL){
 					printf("%p -> %p\n", currn, currn->left);
 					currn = currn->left;
@@ -207,81 +212,93 @@ void delAVLTree(void *src, AVLTree t){
 
 				//Free the node using the correct free function
 				freeAVLNode(currn);
+
+				deleted = TRUE;
 			} else if (currn->right == NULL){ //Case left child present
-				//Simply replace the current node with its single child
-			
-				//Change parent to refer to the child of currn
-				if (currn->parent != NULL){
-					if (currn->parent->right == currn){
-						currn->parent->right = currn->left;
-					} else {
-						currn->parent->left = currn->left;
-					}
-				}
-
-				//Change the head to the new node if currn is the head
-				if (t->head == currn){
-					t->head = currn->left;
-				}
+				//Simply replace the current node with its single child	
+				AVLNode temp = currn->left;
 				
-				//Change the parent of the new currn to 
-				currn->left->parent = currn->parent;
+				//Copy the data of the new node to the old
+				memcpy(dataAVLNode(currn), dataAVLNode(temp), t->nsize);
+
+				//Substitute the old nodes left and right for the new
+				currn->left = temp->left;
+				currn->right = temp->right;
+
+				//Assign parents to the children of the new valued currn if required
+				if (temp->left != NULL)
+					currn->left->parent = currn;
+				
+				if (temp->right != NULL)
+					currn->right->parent = currn;
 
 				//Free the node using the correct free function
-				freeAVLNode(currn);
+				freeAVLNode(temp);
+
+				deleted = TRUE;
 			} else if (currn->left == NULL){ //Case right child present
-				//Simply replace the current node with its single child
-			
-				//Change parent to refer to the child of currn
-				if (currn->parent != NULL){
-					if (currn->parent->right == currn){
-						currn->parent->right = currn->right;
-					} else {
-						currn->parent->left = currn->right;
-					}
-				}
-
-				//Change the head to the new node if currn is the head
-				if (t->head == currn){
-					t->head = currn->right;
-				}
+				//Simply replace the current node with its single child	
+				AVLNode temp = currn->right;
 				
-				//Change the parent of the new currn to 
-				currn->right->parent = currn->parent;
+				//Copy the data of the new node to the old
+				memcpy(dataAVLNode(currn), dataAVLNode(temp), t->nsize);
+
+				//Substitute the old nodes left and right for the new
+				currn->left = temp->left;
+				currn->right = temp->right;
+
+				//Assign parents to the children of the new valued currn if required
+				if (temp->left != NULL)
+					currn->left->parent = currn;
+				
+				if (temp->right != NULL)
+					currn->right->parent = currn;
 
 				//Free the node using the correct free function
-				freeAVLNode(currn);
+				freeAVLNode(temp);
+
+				deleted = TRUE;
 			} else { //Case both children present
-			
+				AVLNode repln;
+
 				//Remove the node from the heighest subtree
 				//Find either the greatest node in the min tree
 				//or the min node in the max tree
 				//Both are a guaranteed replacement for the currn
 				if (currn->left->height > currn->right->height){
-					//Find max node in min tree
-					//Guaranteed to be greatert
-					AVLNode maxn;
-					for (maxn = currn->left; maxn->right != NULL; maxn = maxn->right);
-					
-					//Replace the currn with maxn
-
+					//Max node in min subtree
+					for (repln = currn->left; repln->right != NULL; repln = repln->right);
 				} else {
-				
+					//Min node in max subtree
+					for (repln = currn->right; repln->left != NULL; repln = repln->left);
 				}
+
+				//Copy the data of the replacement node to the currn
+				memcpy(dataAVLNode(currn), dataAVLNode(repln), t->nsize);
+
+				//Start the search at the replacement node and change src to the new currn
+				//so it will be deleted next loop
+				currn = repln;
+				src = dataAVLNode(repln);
 			}
 			
-			//Decrement the length of the tree
-			t->length--;
 		} else if (comp < 0) { //src > currn
 			if (currn->right != NULL){
-				
+				currn = currn->right;
 			} else {
-
+				deleted = TRUE;
 			}
-		} else { //src <= currn
-			
+		} else { //src < currn
+			if (currn->left != NULL){
+				currn = currn->left;
+			} else {
+				deleted = TRUE;
+			}
 		}
 	}
+			
+	//Decrement the length of the tree
+	t->length--;
 }
 
 void printDiagsAVLTree(AVLTree t){
