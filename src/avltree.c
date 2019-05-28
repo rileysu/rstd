@@ -6,6 +6,9 @@
 #include "datatypes.h"
 #include "avltree.h"
 
+#define MAX(A, B) (((A)>(B))?(A):(B))
+#define MIN(A, B) (((A)>(B))?(B):(A))
+
 //NULL pointer as src accepted to init a blank AVLNode
 AVLNode initAVLNode(void *src, AVLTree t){
 	//Allocate for node header and data as given by nsize in tree
@@ -73,59 +76,90 @@ void freeAVLTree(AVLTree t){
 }
 
 AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
-	//Left child of n becomes new root respective to n
-	//Right child of new root becomes left child of old root
+	//Rotation required to leave tree in BST state with height
+	//Assume rotation can be made 
+
+	AVLNode p = n->parent;
+	AVLNode x = n->left;
+	AVLNode y = x->left;
+
+	//Fix children relationships
+	n->left = x->right;
+	x->right = n;	
 	
-	AVLNode ln = n->left;
-	AVLNode lnrc = ln->right;
+	//Fix parent relationships
+	n->left->parent = n;
+	n->parent = x;
+	x->parent = p;
 
-	ln->right = n;
-	n->left = lnrc;
+	//Fix heights
+	n->height = MAX(n->left->height, n->right->height);
+	x->height = MAX(x->left->height, x->right->height);
 
-	//Parent of n is now the old left node of n
-	//Parent of the old left node is now the parent of n (Hence new root)
-	
-	ln->parent = n->parent;
-	n->parent  = ln;
-
-	if (ln->parent != NULL){
-		if (ln->parent->right == n){
-			ln->parent->right = ln;
+	//Fix the possible parent
+	if (p != NULL){
+		if (p->right == n){
+			p->right = x;
 		} else {
-			ln->parent->left = ln;
+			p->left = x;
 		}
+		p->height = MAX(p->left->height, p->right->height);
+	} else {
+		t->head = x;
 	}
+
+	return x;
 }
 
 AVLNode rotateLeftAVLTree(AVLNode n, AVLTree t){
-	//Right child of n becomes new root respective to n
-	//Left child of new root becomes right child of old root
+	//Rotation required to leave tree in BST state with height
+	//Assume rotation can be made 
 
-	AVLNode rn = n->right;
-	AVLNode rnlc = rn->left;
+	AVLNode p = n->parent;
+	AVLNode x = n->right;
+	AVLNode y = x->right;
 
-	rn->left = n;
-	n->right = rnlc;
-
-	//Parent of n is now the old right node of n
-	//Parent of the old right node is now the parent of n (Hence new root)
+	//Fix children relationships
+	n->right = x->left;
+	x->left = n;	
 	
-	rn->parent = n->parent;
-	n->parent = rn;
+	//Fix parent relationships
+	n->right->parent = n;
+	n->parent = x;
+	x->parent = p;
 
-	//Fix parent not refering to the new root (if it exists)
-	if (rn->parent != NULL){
-		if (rn->parent->right == n){
-			rn->parent->right = rn;
+	//Fix heights
+	n->height = MAX(n->left->height, n->right->height);
+	x->height = MAX(x->left->height, x->right->height);
+
+	//Fix the possible parent
+	if (p != NULL){
+		if (p->right == n){
+			p->right = x;
 		} else {
-			rn->parent->left = rn;
+			p->left = x;
 		}
+		p->height = MAX(p->left->height, p->right->height);
+	} else {
+		t->head = x;
 	}
-	
 
+	return x;
 }
 
 AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
+	AVLNode p = n->parent;
+	AVLNode x = n->left;
+	AVLNode y = x->right;
+
+	//Fix children relationships
+	n->left = y->right;
+	x->right = y->left;
+	y->left = x;
+	y->right = n;
+
+	//Fix parent relationships
+	n->left->parent = n;
 	
 }
 
@@ -282,17 +316,19 @@ void delAVLTree(void *src, AVLTree t){
 				src = dataAVLNode(repln);
 			}
 			
-		} else if (comp < 0) { //src > currn
+		} else if (comp < 0){ //src > currn
 			if (currn->right != NULL){
 				currn = currn->right;
 			} else {
-				deleted = TRUE;
+				//Return if value isn't in the tree
+				return;
 			}
 		} else { //src < currn
 			if (currn->left != NULL){
 				currn = currn->left;
 			} else {
-				deleted = TRUE;
+				//Return if value isn't in the tree
+				return;
 			}
 		}
 	}
@@ -359,6 +395,4 @@ void printDiagsAVLNode(AVLNode n, AVLTree t){
 	
 		for (int i = 0; i < 30; i++) printf("-");
 		printf("\n");
-
-
 }
