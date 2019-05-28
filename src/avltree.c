@@ -78,7 +78,6 @@ void freeAVLTree(AVLTree t){
 AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
 	//Rotation required to leave tree in BST state with height
 	//Assume rotation can be made 
-
 	AVLNode p = n->parent;
 	AVLNode x = n->left;
 	AVLNode y = x->left;
@@ -114,7 +113,6 @@ AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
 AVLNode rotateLeftAVLTree(AVLNode n, AVLTree t){
 	//Rotation required to leave tree in BST state with height
 	//Assume rotation can be made 
-
 	AVLNode p = n->parent;
 	AVLNode x = n->right;
 	AVLNode y = x->right;
@@ -148,6 +146,8 @@ AVLNode rotateLeftAVLTree(AVLNode n, AVLTree t){
 }
 
 AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
+	//Rotation required to leave tree in BST state with height
+	//Assume rotation can be made 
 	AVLNode p = n->parent;
 	AVLNode x = n->left;
 	AVLNode y = x->right;
@@ -160,11 +160,65 @@ AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
 
 	//Fix parent relationships
 	n->left->parent = n;
-	
+	x->right->parent = x;
+	n->parent = y;
+	x->parent = y;
+
+	//Fix heights
+	n->height = MAX(n->left->height, n->right->height);
+	x->height = MAX(x->left->height, x->right->height);
+
+	//Fix the possible parent
+	if (p != NULL){
+		if (p->right == n){
+			p->right = y;
+		} else {
+			p->left = y;
+		}
+		p->height = MAX(p->left->height, p->right->height);
+	} else {
+		t->head = y;
+	}
+
+	return y;
 }
 
 AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
-	
+	//Rotation required to leave tree in BST state with height
+	//Assume rotation can be made 
+	AVLNode p = n->parent;
+	AVLNode x = n->left;
+	AVLNode y = x->right;
+
+	//Fix children relationships
+	n->right = y->left;
+	x->left = y->right;
+	y->right = x;
+	y->left = n;
+
+	//Fix parent relationships
+	n->right->parent = n;
+	x->left->parent = x;
+	n->parent = y;
+	x->parent = y;
+
+	//Fix heights
+	n->height = MAX(n->left->height, n->right->height);
+	x->height = MAX(x->left->height, x->right->height);
+
+	//Fix the possible parent
+	if (p != NULL){
+		if (p->right == n){
+			p->right = y;
+		} else {
+			p->left = y;
+		}
+		p->height = MAX(p->left->height, p->right->height);
+	} else {
+		t->head = y;
+	}
+
+	return y;
 }
 
 
