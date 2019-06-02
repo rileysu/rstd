@@ -4,6 +4,7 @@
 * Doubly Linked List
 * Array List
 * Hash Table
+* AVL Tree
 * Complex Numbers and Operations on Complex Numbers
 * Tuples
 * Enhanced For Loops for Lists
