@@ -5,9 +5,11 @@
 
 #define dataAVLNode(N) (((AVLNode) N) + 1) 
 
+typedef int height_t;
+
 typedef struct AVLNode_t{
 	struct AVLNode_t *parent;
-	int height;
+	height_t height;
 	struct AVLNode_t *left;
 	struct AVLNode_t *right;
 } *AVLNode;
@@ -34,11 +36,11 @@ void freeAVLTree(AVLTree);
 
 //Misc
 
+//Simply guarantees the data exists in the tree
 void addAVLTree(void*,AVLTree);
-//addAllAVLTree
 
-void delAVLTree(void*,AVLTree);
-//delAllAVLTree
+//Simply guarantees the data does not exist in the tree
+void remAVLTree(void*,AVLTree);
 
 void rebalanceAVLTree(AVLTree);
 

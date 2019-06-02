@@ -9,6 +9,31 @@
 #define MAX(A, B) (((A)>(B))?(A):(B))
 #define MIN(A, B) (((A)>(B))?(B):(A))
 
+static height_t maxNodeHeightAVLTree(AVLNode n1, AVLNode n2){
+	if (n1 == NULL && n2 == NULL){
+		return 0;
+	} else if (n1 == NULL){
+		return n2->height;
+	} else if (n2 == NULL){
+		return n1->height;
+	} else {
+		return MAX(n1->height, n2->height);
+	}
+}
+
+static height_t diffNodeHeightAVLTree(AVLNode leftn, AVLNode rightn){
+	//Using the (right - left) definition for balance
+	if (leftn == NULL && rightn == NULL){
+		return 0;
+	} else if (leftn == NULL){
+		return rightn->height;
+	} else if (rightn == NULL){
+		return -leftn->height; 
+	} else {
+		return rightn->height - leftn->height;
+	}
+}
+
 //NULL pointer as src accepted to init a blank AVLNode
 AVLNode initAVLNode(void *src, AVLTree t){
 	//Allocate for node header and data as given by nsize in tree
@@ -87,13 +112,14 @@ AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
 	x->right = n;	
 	
 	//Fix parent relationships
-	n->left->parent = n;
+	if (n->left != NULL)
+		n->left->parent = n;
 	n->parent = x;
 	x->parent = p;
 
 	//Fix heights
-	n->height = MAX(n->left->height, n->right->height);
-	x->height = MAX(x->left->height, x->right->height);
+	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -102,7 +128,6 @@ AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
 		} else {
 			p->left = x;
 		}
-		p->height = MAX(p->left->height, p->right->height);
 	} else {
 		t->head = x;
 	}
@@ -122,13 +147,14 @@ AVLNode rotateLeftAVLTree(AVLNode n, AVLTree t){
 	x->left = n;	
 	
 	//Fix parent relationships
-	n->right->parent = n;
+	if (n->right != NULL)
+		n->right->parent = n;
 	n->parent = x;
 	x->parent = p;
 
 	//Fix heights
-	n->height = MAX(n->left->height, n->right->height);
-	x->height = MAX(x->left->height, x->right->height);
+	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -137,7 +163,6 @@ AVLNode rotateLeftAVLTree(AVLNode n, AVLTree t){
 		} else {
 			p->left = x;
 		}
-		p->height = MAX(p->left->height, p->right->height);
 	} else {
 		t->head = x;
 	}
@@ -159,14 +184,17 @@ AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
 	y->right = n;
 
 	//Fix parent relationships
-	n->left->parent = n;
-	x->right->parent = x;
+	if (n->left != NULL)
+		n->left->parent = n;
+	if (x->right != NULL)
+		x->right->parent = x;
 	n->parent = y;
 	x->parent = y;
+	y->parent = p;
 
 	//Fix heights
-	n->height = MAX(n->left->height, n->right->height);
-	x->height = MAX(x->left->height, x->right->height);
+	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -175,7 +203,6 @@ AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
 		} else {
 			p->left = y;
 		}
-		p->height = MAX(p->left->height, p->right->height);
 	} else {
 		t->head = y;
 	}
@@ -187,8 +214,8 @@ AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
 	//Rotation required to leave tree in BST state with height
 	//Assume rotation can be made 
 	AVLNode p = n->parent;
-	AVLNode x = n->left;
-	AVLNode y = x->right;
+	AVLNode x = n->right;
+	AVLNode y = x->left;
 
 	//Fix children relationships
 	n->right = y->left;
@@ -197,14 +224,17 @@ AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
 	y->left = n;
 
 	//Fix parent relationships
-	n->right->parent = n;
-	x->left->parent = x;
+	if (n->right != NULL)
+		n->right->parent = n;
+	if (x->left != NULL)
+		x->left->parent = x;
 	n->parent = y;
 	x->parent = y;
+	y->parent = p;
 
 	//Fix heights
-	n->height = MAX(n->left->height, n->right->height);
-	x->height = MAX(x->left->height, x->right->height);
+	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -213,7 +243,6 @@ AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
 		} else {
 			p->left = y;
 		}
-		p->height = MAX(p->left->height, p->right->height);
 	} else {
 		t->head = y;
 	}
@@ -223,15 +252,20 @@ AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
 
 
 void addAVLTree(void *src, AVLTree t){
+	//Currn is the node that stores the current state in searching the tree and at the end
+	//is used to store the new node added so the tree can be rebalanced
+	AVLNode currn = NULL;
+
 	if (t->length == 0){
 		t->head = initAVLNode(src, t);
 		t->head->parent = NULL;
 		t->head->height = 0;
 		t->head->left = NULL;
 		t->head->right = NULL;
+
 	} else {
 		//Add the node
-		AVLNode currn = t->head;
+		currn = t->head;
 
 		bool allocated = FALSE;
 		while (!allocated){
@@ -242,7 +276,7 @@ void addAVLTree(void *src, AVLTree t){
 				return;
 			} else if (comp < 0){ //src > currn
 				if (currn->right != NULL){
-					printf("%p -> %p\n", currn, currn->right);
+					//printf("%p -> %p\n", currn, currn->right);
 					currn = currn->right;
 				} else {
 					currn->right = initAVLNode(src, t);
@@ -250,11 +284,12 @@ void addAVLTree(void *src, AVLTree t){
 					currn->right->height = 0;
 					currn->right->left = NULL;
 					currn->right->right = NULL;
+					
 					allocated = TRUE;
 				}
 			} else { // src < currn
 				if (currn->left != NULL){
-					printf("%p -> %p\n", currn, currn->left);
+					//printf("%p -> %p\n", currn, currn->left);
 					currn = currn->left;
 				} else {
 					currn->left = initAVLNode(src, t);
@@ -262,6 +297,7 @@ void addAVLTree(void *src, AVLTree t){
 					currn->left->height = 0;
 					currn->left->left = NULL;
 					currn->left->right = NULL;
+					
 					allocated = TRUE;
 				}
 			}
@@ -269,13 +305,50 @@ void addAVLTree(void *src, AVLTree t){
 	}
 	
 	//TODO
-	//Balance tree from currn
+	//Balance tree and fix heights
 	
+	//If the node is the head or its parent is the head then it is
+	//not possible for this addition to be unbalanced and hence nothing
+	//needs to be done
+
+	while (currn != NULL){
+		currn->height = 1 + maxNodeHeightAVLTree(currn->left, currn->right); 
+		
+		int bal = diffNodeHeightAVLTree(currn->left, currn->right);
+		if (bal > 1){ //Right heavy (Therefore right is not null)
+			if (diffNodeHeightAVLTree(currn->right->left, currn->right->right) < 0){
+				//Left heavy right node requires a right rotate first
+				rotateRightLeftAVLTree(currn, t);
+				break;
+			} else {
+				//Otherwise it can just be rotated left
+				rotateLeftAVLTree(currn, t);
+				break;
+			}
+		} else if (bal < -1){ //Left heavy (Therfore left is not null)
+			if (diffNodeHeightAVLTree(currn->left->left, currn->left->right) > 0){
+				//Right heavy left node requires a left rotation first
+				rotateLeftRightAVLTree(currn, t);
+				break;
+			} else {
+				//Otherwise it can just be rotated right
+				rotateRightAVLTree(currn, t);
+				break;
+			}
+		}
+
+		currn = currn->parent;
+	}
+
 	t->length++;
 }
 
-void delAVLTree(void *src, AVLTree t){
+void remAVLTree(void *src, AVLTree t){
 	AVLNode currn = t->head;
+
+	//Exit if the tree is empty
+	if (currn == NULL)
+		return;
 
 	bool deleted = FALSE;
 	while (!deleted){
@@ -283,7 +356,8 @@ void delAVLTree(void *src, AVLTree t){
 		if (comp == 0){ //src == currn
 			if (currn->right == NULL && currn->left == NULL){ //Case No children present
 				//Simply delete the node since nothing depends on it
-				
+				AVLNode temp = currn;
+
 				//Remove the reference from the parent to the child if the parent exists
 				if (currn->parent != NULL){
 					if (currn->parent->right == currn){
@@ -298,8 +372,10 @@ void delAVLTree(void *src, AVLTree t){
 					t->head = NULL;
 				}
 
+				//Change currn to something we can use later
 				//Free the node using the correct free function
-				freeAVLNode(currn);
+				currn = currn->parent;
+				freeAVLNode(temp);
 
 				deleted = TRUE;
 			} else if (currn->right == NULL){ //Case left child present
@@ -386,7 +462,35 @@ void delAVLTree(void *src, AVLTree t){
 			}
 		}
 	}
-			
+
+	//TODO
+	//Rebalance tree and fix heights
+	
+	while (currn != NULL){
+		currn->height = 1 + maxNodeHeightAVLTree(currn->left, currn->right); 
+		
+		int bal = diffNodeHeightAVLTree(currn->left, currn->right);
+		if (bal > 1){ //Right heavy (Therefore right is not null)
+			if (diffNodeHeightAVLTree(currn->right->left, currn->right->right) < 0){
+				//Left heavy right node requires a right rotate first
+				currn = rotateRightLeftAVLTree(currn, t);
+			} else {
+				//Otherwise it can just be rotated left
+				currn = rotateLeftAVLTree(currn, t);
+			}
+		} else if (bal < -1){ //Left heavy (Therfore left is not null)
+			if (diffNodeHeightAVLTree(currn->left->left, currn->left->right) > 0){
+				//Right heavy left node requires a left rotation first
+				currn = rotateLeftRightAVLTree(currn, t);
+			} else {
+				//Otherwise it can just be rotated right
+				currn = rotateRightAVLTree(currn, t);
+			}
+		}
+
+		currn = currn->parent;
+	}
+
 	//Decrement the length of the tree
 	t->length--;
 }
@@ -437,7 +541,7 @@ void printDiagsAVLNode(AVLNode n, AVLTree t){
 		
 		//Print hex of whatever the node contains
 		printf("Node Data: 0x");
-		for (int i = t->nsize-1; i >= 0; i--){
+		for (int i = 0; i < t->nsize; i++){
 			printf("%02x",(*(((unsigned char*)dataAVLNode(n)) + i)));
 		}
 
