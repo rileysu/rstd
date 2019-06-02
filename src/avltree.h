@@ -3,9 +3,11 @@
 
 #include <stdlib.h>
 
+#include "datatypes.h"
+
 #define dataAVLNode(N) (((AVLNode) N) + 1) 
 
-typedef int height_t;
+typedef unsigned int height_t;
 
 typedef struct AVLNode_t{
 	struct AVLNode_t *parent;
@@ -23,7 +25,7 @@ typedef struct AVLTree_t{
 		//-1 ==> src1 < src2
 		//0 ==> src1 == src2
 		//1 ==> src1 > src2
-		//Maybe I should add an enum to simplify output
+		//All functions use this for internal comparison
 } *AVLTree;
 
 //Init
@@ -36,15 +38,17 @@ void freeAVLTree(AVLTree);
 
 //Misc
 
-//Simply guarantees the data exists in the tree
+//Return whether the data exists in the tree
+bool containsAVLTree(void*,AVLTree);
+
+//Guarantees the data exists in the tree
 void addAVLTree(void*,AVLTree);
 
-//Simply guarantees the data does not exist in the tree
-void remAVLTree(void*,AVLTree);
+//Return the data from the node that matches src
+void *getAVLTree(void*,AVLTree);
 
-void rebalanceAVLTree(AVLTree);
-
-AVLNode searchAVLTree(void*,AVLTree);
+//Guarantees the data does not exist in the tree
+void delAVLTree(void*,AVLTree);
 
 //Diag
 void printDiagsAVLTree(AVLTree);

@@ -102,7 +102,7 @@ void *getHTable(void *key, HTable ht){
 	return NULL;
 }
 
-void remHTable(void *key, HTable ht){
+void delHTable(void *key, HTable ht){
 	void *el = getHTable(key, ht);
 	if (el != NULL)
 		memset(el, 0, sizeof(bool) + ht->keysize + ht->valuesize);

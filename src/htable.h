@@ -34,7 +34,7 @@ void setHTable(void*,void*,HTable);
 
 void *getHTable(void*,HTable);
 
-void remHTable(void*,HTable);
+void delHTable(void*,HTable);
 
 //Diag
 void printDiagsHTable(HTable);
