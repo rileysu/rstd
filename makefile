@@ -2,7 +2,7 @@ src = $(wildcard src/*.c)
 testsrc  =$(wildcard tests/*.c)
 tests =$(patsubst tests/%.c,tests/%,$(testsrc))
 headers = $(wildcard src/*.h)
-obj = $(patsubst src/%.c,bin/%.o,$(wildcard src/*.c))
+obj = $(patsubst src/%.c,obj/%.o,$(wildcard src/*.c))
 
 CFLAGS = -gdwarf-2 -Wall -lm
 
@@ -10,7 +10,7 @@ all: $(obj) tests
 
 tests: $(patsubst tests/%.c,tests/%.out,$(testsrc))
 
-bin/%.o: src/%.c
+obj/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 tests/%.out: $(obj) $(testsrc)

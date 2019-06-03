@@ -210,7 +210,7 @@ static AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
 }
 
 static AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
-	//Rotation required to leave tree in BST state with height
+	//Rotation required to leave tree in BST state with height, up to n
 	//Assume rotation can be made 
 	AVLNode p = n->parent;
 	AVLNode x = n->right;
@@ -260,7 +260,7 @@ bool containsAVLTree(void *src, AVLTree t){
 			return TRUE;
 		} else if (comp < 0){ //src > currn
 			currn = currn->right;
-		} else { //src < currn`
+		} else { //src < currn
 			currn = currn->left;
 		}
 	}
@@ -321,7 +321,6 @@ void addAVLTree(void *src, AVLTree t){
 		}
 	}
 	
-	//TODO
 	//Balance tree and fix heights
 
 	while (currn != NULL){
@@ -500,7 +499,6 @@ void delAVLTree(void *src, AVLTree t){
 		}
 	}
 
-	//TODO
 	//Rebalance tree and fix heights
 	
 	while (currn != NULL){

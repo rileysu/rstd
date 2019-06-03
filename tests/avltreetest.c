@@ -15,6 +15,23 @@ int compareInt(void *src1, void *src2){
 		return 0;
 }
 
+typedef struct IntStr_t{
+	int key;
+	char val[12];
+} IntStr;
+
+int compareMap(void *src1, void *src2){
+	IntStr *is1 = (IntStr*)src1;
+	IntStr *is2 = (IntStr*)src2;
+
+	if (is1->key > is2->key)
+		return 1;
+	else if (is1->key < is2->key)
+		return -1;
+	else
+		return 0;
+}
+
 bool testInitAndFree(){
 	AVLTree t = initAVLTree(sizeof(int), compareInt);
 	bool test = TRUE;
@@ -175,12 +192,29 @@ bool testCorrectRotations(){
 	return test;
 }
 
+bool testMapExample(){
+	AVLTree t = initAVLTree(sizeof(struct IntStr_t), compareMap);
+	bool test = TRUE;
+	IntStr a;
+	
+	a.key = 1;
+	strcpy(a.val, "riley is cl");
+
+	addAVLTree(&a, t);
+
+	printDiagsAVLTree(t);
+
+	freeAVLTree(t);
+	return test;
+}
+
 int main(void){
 	printf("Test AVLTree\n");
 	printf("Init and Free: %d\n", testInitAndFree());
 	printf("Defined Behaviour: %d\n", testDefinedBehaviour());
 	printf("Mass Add and Remove: %d\n", testMassAddAndRemove());
 	printf("Correct Rotations: %d\n", testCorrectRotations());
+	printf("Map Example: %d\n", testMapExample());
 
 	return 0;
 }
