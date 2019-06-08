@@ -84,7 +84,7 @@ bool testMassAddAndRemove(){
 			int in = rand();
 			addAVLTree(&in, t);  
 		}
-	
+
 		if (t->length <= 0 || t->length > 10000)
 			test = FALSE;
 	
@@ -125,9 +125,9 @@ bool testCorrectRotations(){
 	if (t->nsize != sizeof(int) || t->length != 3)
 		test = FALSE;
 
-	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 2 ||
-			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 1 ||
-			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 1)
+	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 1 ||
+			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 0 ||
+			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 0)
 		test = FALSE;
 	
 	freeAVLTree(t);
@@ -144,9 +144,9 @@ bool testCorrectRotations(){
 	if (t->nsize != sizeof(int) || t->length != 3)
 		test = FALSE;
 
-	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 2 ||
-			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 1 ||
-			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 1)
+	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 1 ||
+			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 0 ||
+			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 0)
 		test = FALSE;
 
 	freeAVLTree(t);
@@ -164,9 +164,9 @@ bool testCorrectRotations(){
 	if (t->nsize != sizeof(int) || t->length != 3)
 		test = FALSE;
 
-	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 2 ||
-			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 1 ||
-			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 1)
+	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 1 ||
+			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 0 ||
+			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 0)
 		test = FALSE;
 	
 	freeAVLTree(t);
@@ -183,9 +183,9 @@ bool testCorrectRotations(){
 	if (t->nsize != sizeof(int) || t->length != 3)
 		test = FALSE;
 
-	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 2 ||
-			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 1 ||
-			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 1)
+	if (*(int*)dataAVLNode(t->head) != 2 || t->head->height != 1 ||
+			*(int*)dataAVLNode(t->head->left) != 1 || t->head->left->height != 0 ||
+			*(int*)dataAVLNode(t->head->right) != 3 || t->head->right->height != 0)
 		test = FALSE;
 
 	freeAVLTree(t);
@@ -197,12 +197,50 @@ bool testMapExample(){
 	bool test = TRUE;
 	IntStr a;
 	
-	a.key = 1;
+	a.key = 0;
 	strcpy(a.val, "riley is cl");
 
 	addAVLTree(&a, t);
 
-	printDiagsAVLTree(t);
+	a.key = 1;
+	strcpy(a.val, "riley nt cl");
+
+	addAVLTree(&a, t);
+
+	a.key = 2;
+	strcpy(a.val, "riley mb cl");
+
+	addAVLTree(&a, t);
+
+	int b;
+	IntStr *c;
+
+	c = (IntStr*)dataAVLNode(t->head);
+	if (c->key != 1)
+		test = FALSE;
+
+	c = (IntStr*)dataAVLNode(t->head->left);
+	if (c->key != 0)
+		test = FALSE;
+
+	c = (IntStr*)dataAVLNode(t->head->right);
+	if (c->key != 2)
+		test = FALSE;
+
+	b = 0;
+	c = getAVLTree(&b, t);
+	if (strcmp(c->val, "riley is cl") != 0)
+		test = FALSE;
+
+	b = 1;
+	c = getAVLTree(&b, t);
+	if (strcmp(c->val, "riley nt cl") != 0)
+		test = FALSE;
+
+	b = 2;
+	c = getAVLTree(&b, t);
+	if (strcmp(c->val, "riley mb cl") != 0)
+		test = FALSE;
 
 	freeAVLTree(t);
 	return test;

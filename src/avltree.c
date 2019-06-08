@@ -9,27 +9,27 @@
 #define MAX(A, B) (((A)>(B))?(A):(B))
 #define MIN(A, B) (((A)>(B))?(B):(A))
 
-static height_t maxNodeHeightAVLTree(AVLNode n1, AVLNode n2){
+static inline height_t nextNodeHeightAVLTree(AVLNode n1, AVLNode n2){
 	if (n1 == NULL && n2 == NULL){
 		return 0;
 	} else if (n1 == NULL){
-		return n2->height;
+		return n2->height + 1;
 	} else if (n2 == NULL){
-		return n1->height;
+		return n1->height + 1;
 	} else {
-		return MAX(n1->height, n2->height);
+		return MAX(n1->height, n2->height) + 1;
 	}
 }
 
 //I could use a char here but I don't see the need for this micro-optimisation
 //Using the (right - left) definition for balance
-static int diffNodeHeightAVLTree(AVLNode leftn, AVLNode rightn){
+static inline int diffNodeHeightAVLTree(AVLNode leftn, AVLNode rightn){
 	if (leftn == NULL && rightn == NULL){
 		return 0;
 	} else if (leftn == NULL){
-		return rightn->height;
+		return rightn->height + 1;
 	} else if (rightn == NULL){
-		return -leftn->height; 
+		return -leftn->height - 1; 
 	} else {
 		return rightn->height - leftn->height;
 	}
@@ -118,8 +118,8 @@ static AVLNode rotateRightAVLTree(AVLNode n, AVLTree t){
 	x->parent = p;
 
 	//Fix heights
-	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
-	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = nextNodeHeightAVLTree(x->left, x->right);
+	n->height = nextNodeHeightAVLTree(n->left, n->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -152,8 +152,8 @@ static AVLNode rotateLeftAVLTree(AVLNode n, AVLTree t){
 	x->parent = p;
 
 	//Fix heights
-	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
-	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = nextNodeHeightAVLTree(x->left, x->right);
+	n->height = nextNodeHeightAVLTree(n->left, n->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -192,8 +192,8 @@ static AVLNode rotateLeftRightAVLTree(AVLNode n, AVLTree t){
 	y->parent = p;
 
 	//Fix heights
-	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
-	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = nextNodeHeightAVLTree(x->left, x->right);
+	n->height = nextNodeHeightAVLTree(n->left, n->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -232,8 +232,8 @@ static AVLNode rotateRightLeftAVLTree(AVLNode n, AVLTree t){
 	y->parent = p;
 
 	//Fix heights
-	x->height = 1 + maxNodeHeightAVLTree(x->left, x->right);
-	n->height = 1 + maxNodeHeightAVLTree(n->left, n->right);
+	x->height = nextNodeHeightAVLTree(x->left, x->right);
+	n->height = nextNodeHeightAVLTree(n->left, n->right);
 
 	//Fix the possible parent
 	if (p != NULL){
@@ -276,7 +276,7 @@ void addAVLTree(void *src, AVLTree t){
 	if (t->length == 0){
 		t->head = initAVLNode(src, t);
 		t->head->parent = NULL;
-		t->head->height = 1;
+		t->head->height = 0;
 		t->head->left = NULL;
 		t->head->right = NULL;
 
@@ -298,7 +298,7 @@ void addAVLTree(void *src, AVLTree t){
 				} else {
 					currn->right = initAVLNode(src, t);
 					currn->right->parent = currn;
-					currn->right->height = 1;
+					currn->right->height = 0;
 					currn->right->left = NULL;
 					currn->right->right = NULL;
 					
@@ -311,7 +311,7 @@ void addAVLTree(void *src, AVLTree t){
 				} else {
 					currn->left = initAVLNode(src, t);
 					currn->left->parent = currn;
-					currn->left->height = 1;
+					currn->left->height = 0;
 					currn->left->left = NULL;
 					currn->left->right = NULL;
 					
@@ -324,7 +324,7 @@ void addAVLTree(void *src, AVLTree t){
 	//Balance tree and fix heights
 
 	while (currn != NULL){
-		currn->height = 1 + maxNodeHeightAVLTree(currn->left, currn->right); 
+		currn->height = nextNodeHeightAVLTree(currn->left, currn->right); 
 		
 		int bal = diffNodeHeightAVLTree(currn->left, currn->right);
 		if (bal > 1){ //Right heavy (Therefore right is not null)
@@ -354,7 +354,7 @@ void addAVLTree(void *src, AVLTree t){
 
 	//Finish calculating heights of all parents if prev loop is broken early
 	while (currn != NULL){
-		currn->height = 1 + maxNodeHeightAVLTree(currn->left, currn->right); 
+		currn->height = nextNodeHeightAVLTree(currn->left, currn->right); 
 		currn = currn->parent;
 	}
 
@@ -502,7 +502,7 @@ void delAVLTree(void *src, AVLTree t){
 	//Rebalance tree and fix heights
 	
 	while (currn != NULL){
-		currn->height = 1 + maxNodeHeightAVLTree(currn->left, currn->right); 
+		currn->height = nextNodeHeightAVLTree(currn->left, currn->right); 
 		
 		int bal = diffNodeHeightAVLTree(currn->left, currn->right);
 		if (bal > 1){ //Right heavy (Therefore right is not null)
