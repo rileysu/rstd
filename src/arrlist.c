@@ -5,9 +5,26 @@
 #include "arrlist.h"
 
 ArrList initArrList(int length, size_t nsize){
-	struct ArrList_t *l = malloc(sizeof(struct ArrList_t)); 
+	//Allocate for ArrList in a singular data segment that expands dynamically
+	//Allocated memory will look like this:
+	//
+	// |--------------|--------------|--------------|-----
+	// | Data Segment | Data Segment | Data Segment |. . .
+	// |--------------|--------------|--------------|-----
+	// |     Data     |     Data     |     Data     |. . .
+	// |--------------|--------------|--------------|-----
+	//
+	//Each data node is of size nsize and the number of nodes is length
+	struct ArrList_t *l;
 
-	//Return NULL and print error  to indicate no memory allocated
+	//Return NULL and printt error to indicate no memory allocated
+	if ((l = malloc(sizeof(struct ArrList_t))) == NULL){
+		fprintf(stderr, "Malloc failed in initArrList.\n");
+		return NULL;
+
+	}
+
+	//Return NULL and print error to indicate no memory allocated
 	if ((l->head = malloc(nsize*length)) == NULL){ 
 		fprintf(stderr, "Malloc failed in initArrList.\n");
 		return NULL;

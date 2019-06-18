@@ -42,7 +42,7 @@ bool testSet(){
 
 	bool testa = TRUE;
 
-	printDiagsHTable(ht);
+	//printDiagsHTable(ht);
 	freeHTable(ht);
 	return testa;
 }

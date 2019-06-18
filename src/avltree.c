@@ -41,6 +41,12 @@ AVLNode initAVLNode(void *src, AVLTree t){
 	AVLNode n = malloc(sizeof(struct AVLNode_t) + t->nsize);
 	//Callee is required to set parent, height, left, right
 
+	//Handle out of memory and other malloc issues
+	if (n == NULL){
+		fprintf(stderr, "Malloc failed in initAVLNode.\n");
+                return NULL;
+	}
+
 	//Only init memory if src != NULL
 	if (src != NULL)
 		memcpy(dataAVLNode(n), src, t->nsize);
@@ -50,6 +56,12 @@ AVLNode initAVLNode(void *src, AVLTree t){
 
 AVLTree initAVLTree(size_t nsize, int (*compare)(void*,void*)){
 	AVLTree t = malloc(sizeof(struct AVLTree_t));
+
+	//Handle out of memory and other malloc issues
+	if (t == NULL){
+		fprintf(stderr, "Malloc failed in initAVLTree.\n");
+                return NULL;
+	}
 
 	//Empty tree has no elements or head
 	t->head = NULL;
